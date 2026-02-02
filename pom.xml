@@ -201,6 +201,16 @@
         <version>1.20.2</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>com.dylibso.chicory</groupId>
+        <artifactId>runtime</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.dylibso.chicory</groupId>
+        <artifactId>wasi</artifactId>
+        <version>1.6.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
