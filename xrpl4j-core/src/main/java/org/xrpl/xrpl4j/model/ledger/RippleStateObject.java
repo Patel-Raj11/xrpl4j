@@ -23,9 +23,11 @@ package org.xrpl.xrpl4j.model.ledger;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.annotations.Beta;
 import com.google.common.primitives.UnsignedInteger;
 import org.immutables.value.Value;
 import org.xrpl.xrpl4j.model.flags.RippleStateFlags;
+import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.Hash256;
 import org.xrpl.xrpl4j.model.transactions.IssuedCurrencyAmount;
 
@@ -170,6 +172,30 @@ public interface RippleStateObject extends LedgerObject {
    */
   @JsonProperty("HighQualityOut")
   Optional<UnsignedInteger> highQualityOut();
+
+  /**
+   * The sponsor that is paying the reserve on behalf of the "high" account on the trustline.
+   *
+   * <p>This method will be marked {@link Beta} until the SponsoredFees amendment is enabled on mainnet.
+   * Its API is subject to change.</p>
+   *
+   * @return An {@link Optional} {@link Address} of the high account's sponsor.
+   */
+  @Beta
+  @JsonProperty("HighSponsor")
+  Optional<Address> highSponsor();
+
+  /**
+   * The sponsor that is paying the reserve on behalf of the "low" account on the trustline.
+   *
+   * <p>This method will be marked {@link Beta} until the SponsoredFees amendment is enabled on mainnet.
+   * Its API is subject to change.</p>
+   *
+   * @return An {@link Optional} {@link Address} of the low account's sponsor.
+   */
+  @Beta
+  @JsonProperty("LowSponsor")
+  Optional<Address> lowSponsor();
 
   /**
    * Unique identifier for this {@link RippleStateObject}.

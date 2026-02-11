@@ -113,4 +113,58 @@ public class AccountObjectsRequestParamsJsonTests extends AbstractJsonTest {
 
     assertCanSerializeAndDeserialize(params, json);
   }
+
+  @Test
+  void testWithSponsoredTrue() throws JSONException, JsonProcessingException {
+    AccountObjectsRequestParams params = AccountObjectsRequestParams.builder()
+      .account(Address.of("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59"))
+      .ledgerSpecifier(LedgerSpecifier.VALIDATED)
+      .sponsored(true)
+      .build();
+
+    String json = "{\n" +
+      "            \"account\": \"r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59\",\n" +
+      "            \"ledger_index\": \"validated\",\n" +
+      "            \"deletion_blockers_only\": false,\n" +
+      "            \"sponsored\": true\n" +
+      "        }";
+
+    assertCanSerializeAndDeserialize(params, json);
+  }
+
+  @Test
+  void testWithSponsoredFalse() throws JSONException, JsonProcessingException {
+    AccountObjectsRequestParams params = AccountObjectsRequestParams.builder()
+      .account(Address.of("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59"))
+      .ledgerSpecifier(LedgerSpecifier.VALIDATED)
+      .sponsored(false)
+      .build();
+
+    String json = "{\n" +
+      "            \"account\": \"r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59\",\n" +
+      "            \"ledger_index\": \"validated\",\n" +
+      "            \"deletion_blockers_only\": false,\n" +
+      "            \"sponsored\": false\n" +
+      "        }";
+
+    assertCanSerializeAndDeserialize(params, json);
+  }
+
+  @Test
+  void testWithSponsorshipType() throws JSONException, JsonProcessingException {
+    AccountObjectsRequestParams params = AccountObjectsRequestParams.builder()
+      .account(Address.of("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59"))
+      .ledgerSpecifier(LedgerSpecifier.VALIDATED)
+      .type(AccountObjectsRequestParams.AccountObjectType.SPONSORSHIP)
+      .build();
+
+    String json = "{\n" +
+      "            \"account\": \"r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59\",\n" +
+      "            \"ledger_index\": \"validated\",\n" +
+      "            \"type\": \"sponsorship\",\n" +
+      "            \"deletion_blockers_only\": false\n" +
+      "        }";
+
+    assertCanSerializeAndDeserialize(params, json);
+  }
 }
