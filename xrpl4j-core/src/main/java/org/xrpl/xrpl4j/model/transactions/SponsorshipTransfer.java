@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import org.immutables.value.Value;
 import org.xrpl.xrpl4j.model.flags.SponsorFlags;
 import org.xrpl.xrpl4j.model.flags.TransactionFlags;
@@ -101,5 +102,42 @@ public interface SponsorshipTransfer extends Transaction {
    */
   @JsonProperty("SponsorSignature")
   Optional<SponsorSignature> sponsorSignature();
+
+  /**
+   * Validates that when Sponsor is present, SponsorFlags must also be present with tfSponsorReserve set.
+   * This is required for transferring sponsorship to a new sponsor.
+   */
+  @Value.Check
+  default void validateSponsorRequiresSponsorFlags() {
+    if (sponsor().isPresent()) {
+      Preconditions.checkState(sponsorFlags().isPresent(),
+        "SponsorFlags must be specified when Sponsor is present.");
+
+      Preconditions.checkState(sponsorFlags().get().tfSponsorReserve(),
+        "SponsorFlags must include tfSponsorReserve when Sponsor is present.");
+    }
+  }
+
+  /**
+   * Validates that SponsorFlags is only present when Sponsor is present.
+   */
+  @Value.Check
+  default void validateSponsorFlagsRequiresSponsor() {
+    if (sponsorFlags().isPresent() && sponsorFlags().get().tfSponsorReserve()) {
+      Preconditions.checkState(sponsor().isPresent(),
+        "Sponsor must be specified when SponsorFlags includes tfSponsorReserve.");
+    }
+  }
+
+  /**
+   * Validates that SponsorSignature is only present when Sponsor is present.
+   */
+  @Value.Check
+  default void validateSponsorSignatureRequiresSponsor() {
+    if (sponsorSignature().isPresent()) {
+      Preconditions.checkState(sponsor().isPresent(),
+        "Sponsor must be specified when SponsorSignature is present.");
+    }
+  }
 }
 

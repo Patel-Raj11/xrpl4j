@@ -21,6 +21,7 @@ package org.xrpl.xrpl4j.model.flags;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.json.JSONException;
@@ -111,6 +112,46 @@ public class SponsorshipSetFlagsTest extends AbstractFlagsTest {
       "}", SponsorshipSetFlags.DELETE_OBJECT.getValue());
 
     assertCanSerializeAndDeserialize(wrapper, json);
+  }
+
+  @Test
+  void testMutuallyExclusiveSetAndClearFeeFlags() {
+    assertThatThrownBy(() -> SponsorshipSetFlags.builder()
+      .tfSponsorshipSetRequireSignForFee(true)
+      .tfSponsorshipClearRequireSignForFee(true)
+      .build()
+    )
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("tfSponsorshipSetRequireSignForFee and tfSponsorshipClearRequireSignForFee cannot both be set.");
+  }
+
+  @Test
+  void testMutuallyExclusiveSetAndClearReserveFlags() {
+    assertThatThrownBy(() -> SponsorshipSetFlags.builder()
+      .tfSponsorshipSetRequireSignForReserve(true)
+      .tfSponsorshipClearRequireSignForReserve(true)
+      .build()
+    )
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("tfSponsorshipSetRequireSignForReserve and tfSponsorshipClearRequireSignForReserve cannot both be set.");
+  }
+
+  @Test
+  void testMutuallyExclusiveSetAndClearFeeFlagsViaOf() {
+    // SET_REQUIRE_SIGN_FOR_FEE (0x00010000) | CLEAR_REQUIRE_SIGN_FOR_FEE (0x00020000)
+    long invalidValue = 0x00010000L | 0x00020000L;
+    assertThatThrownBy(() -> SponsorshipSetFlags.of(invalidValue))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("tfSponsorshipSetRequireSignForFee and tfSponsorshipClearRequireSignForFee cannot both be set.");
+  }
+
+  @Test
+  void testMutuallyExclusiveSetAndClearReserveFlagsViaOf() {
+    // SET_REQUIRE_SIGN_FOR_RESERVE (0x00040000) | CLEAR_REQUIRE_SIGN_FOR_RESERVE (0x00080000)
+    long invalidValue = 0x00040000L | 0x00080000L;
+    assertThatThrownBy(() -> SponsorshipSetFlags.of(invalidValue))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("tfSponsorshipSetRequireSignForReserve and tfSponsorshipClearRequireSignForReserve cannot both be set.");
   }
 }
 

@@ -20,6 +20,8 @@ package org.xrpl.xrpl4j.model.transactions.json;
  * =========================LICENSE_END==================================
  */
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.primitives.UnsignedInteger;
 import org.json.JSONException;
@@ -124,5 +126,124 @@ public class SponsorshipSetJsonTest extends AbstractJsonTest {
 
     assertCanSerializeAndDeserialize(sponsorshipSet, json);
   }
-}
 
+  @Test
+  public void testNeitherSponsorNorSponseeThrows() {
+    assertThatThrownBy(() -> SponsorshipSet.builder()
+      .account(Address.of("rN7n7otQDd6FczFgLdlqtyMVrn3HMfXpf"))
+      .feeAmount(XrpCurrencyAmount.ofDrops(1000000))
+      .fee(XrpCurrencyAmount.ofDrops(12))
+      .sequence(UnsignedInteger.valueOf(42))
+      .signingPublicKey(
+        PublicKey.fromBase16EncodedPublicKey("ED87987410480E90474F7A02E0DA0CE4E6ABC8A1377864026A1FEE2718688B0B84")
+      )
+      .build()
+    )
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("Either Sponsor or Sponsee must be specified.");
+  }
+
+  @Test
+  public void testBothSponsorAndSponseeThrows() {
+    assertThatThrownBy(() -> SponsorshipSet.builder()
+      .account(Address.of("rN7n7otQDd6FczFgLdlqtyMVrn3HMfXpf"))
+      .sponsor(Address.of("rSponsor1234567890123456789012345"))
+      .sponsee(Address.of("rfkDkFai4jUfCvAJiZ5Vm7XvvWjYvDqeYo"))
+      .flags(SponsorshipSetFlags.DELETE_OBJECT)
+      .fee(XrpCurrencyAmount.ofDrops(12))
+      .sequence(UnsignedInteger.valueOf(42))
+      .signingPublicKey(
+        PublicKey.fromBase16EncodedPublicKey("ED87987410480E90474F7A02E0DA0CE4E6ABC8A1377864026A1FEE2718688B0B84")
+      )
+      .build()
+    )
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("Both Sponsor and Sponsee cannot be specified at the same time.");
+  }
+
+  @Test
+  public void testSponsorWithoutDeleteObjectThrows() {
+    assertThatThrownBy(() -> SponsorshipSet.builder()
+      .account(Address.of("rfkDkFai4jUfCvAJiZ5Vm7XvvWjYvDqeYo"))
+      .sponsor(Address.of("rN7n7otQDd6FczFgLdlqtyMVrn3HMfXpf"))
+      .feeAmount(XrpCurrencyAmount.ofDrops(1000000))
+      .fee(XrpCurrencyAmount.ofDrops(12))
+      .sequence(UnsignedInteger.valueOf(42))
+      .signingPublicKey(
+        PublicKey.fromBase16EncodedPublicKey("ED87987410480E90474F7A02E0DA0CE4E6ABC8A1377864026A1FEE2718688B0B84")
+      )
+      .build()
+    )
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("When Sponsor is specified (Account is Sponsee), only tfDeleteObject is allowed. " +
+        "Only the sponsor can create or update the Sponsorship object.");
+  }
+
+  @Test
+  public void testDeleteObjectWithFeeAmountThrows() {
+    assertThatThrownBy(() -> SponsorshipSet.builder()
+      .account(Address.of("rfkDkFai4jUfCvAJiZ5Vm7XvvWjYvDqeYo"))
+      .sponsor(Address.of("rN7n7otQDd6FczFgLdlqtyMVrn3HMfXpf"))
+      .flags(SponsorshipSetFlags.DELETE_OBJECT)
+      .feeAmount(XrpCurrencyAmount.ofDrops(1000000))
+      .fee(XrpCurrencyAmount.ofDrops(12))
+      .sequence(UnsignedInteger.valueOf(42))
+      .signingPublicKey(
+        PublicKey.fromBase16EncodedPublicKey("ED87987410480E90474F7A02E0DA0CE4E6ABC8A1377864026A1FEE2718688B0B84")
+      )
+      .build()
+    )
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("FeeAmount cannot be specified when tfDeleteObject is enabled.");
+  }
+
+  @Test
+  public void testDeleteObjectWithMaxFeeThrows() {
+    assertThatThrownBy(() -> SponsorshipSet.builder()
+      .account(Address.of("rfkDkFai4jUfCvAJiZ5Vm7XvvWjYvDqeYo"))
+      .sponsor(Address.of("rN7n7otQDd6FczFgLdlqtyMVrn3HMfXpf"))
+      .flags(SponsorshipSetFlags.DELETE_OBJECT)
+      .maxFee(XrpCurrencyAmount.ofDrops(1000))
+      .fee(XrpCurrencyAmount.ofDrops(12))
+      .sequence(UnsignedInteger.valueOf(42))
+      .signingPublicKey(
+        PublicKey.fromBase16EncodedPublicKey("ED87987410480E90474F7A02E0DA0CE4E6ABC8A1377864026A1FEE2718688B0B84")
+      )
+      .build()
+    )
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("MaxFee cannot be specified when tfDeleteObject is enabled.");
+  }
+
+  @Test
+  public void testDeleteObjectWithReserveCountThrows() {
+    assertThatThrownBy(() -> SponsorshipSet.builder()
+      .account(Address.of("rfkDkFai4jUfCvAJiZ5Vm7XvvWjYvDqeYo"))
+      .sponsor(Address.of("rN7n7otQDd6FczFgLdlqtyMVrn3HMfXpf"))
+      .flags(SponsorshipSetFlags.DELETE_OBJECT)
+      .reserveCount(UnsignedInteger.valueOf(5))
+      .fee(XrpCurrencyAmount.ofDrops(12))
+      .sequence(UnsignedInteger.valueOf(42))
+      .signingPublicKey(
+        PublicKey.fromBase16EncodedPublicKey("ED87987410480E90474F7A02E0DA0CE4E6ABC8A1377864026A1FEE2718688B0B84")
+      )
+      .build()
+    )
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessage("ReserveCount cannot be specified when tfDeleteObject is enabled.");
+  }
+
+  @Test
+  public void testMutuallyExclusiveSetAndClearFeeFlagsThrows() {
+    assertThatThrownBy(() -> SponsorshipSetFlags.of(0x00010000L | 0x00020000L))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("tfSponsorshipSetRequireSignForFee and tfSponsorshipClearRequireSignForFee cannot both be set.");
+  }
+
+  @Test
+  public void testMutuallyExclusiveSetAndClearReserveFlagsThrows() {
+    assertThatThrownBy(() -> SponsorshipSetFlags.of(0x00040000L | 0x00080000L))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("tfSponsorshipSetRequireSignForReserve and tfSponsorshipClearRequireSignForReserve cannot both be set.");
+  }
+}

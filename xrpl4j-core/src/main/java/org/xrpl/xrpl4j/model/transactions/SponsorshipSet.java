@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedInteger;
 import org.immutables.value.Value;
 import org.xrpl.xrpl4j.model.flags.SponsorshipSetFlags;
@@ -107,5 +108,79 @@ public interface SponsorshipSet extends Transaction {
    */
   @JsonProperty("ReserveCount")
   Optional<UnsignedInteger> reserveCount();
+
+  /**
+   * Validates that exactly one of {@link #sponsor()} or {@link #sponsee()} is present.
+   */
+  @Value.Check
+  default void validateExactlyOneSponsorOrSponsee() {
+    boolean hasSponsor = sponsor().isPresent();
+    boolean hasSponsee = sponsee().isPresent();
+
+    Preconditions.checkState(hasSponsor || hasSponsee,
+      "Either Sponsor or Sponsee must be specified.");
+
+    Preconditions.checkState(!(hasSponsor && hasSponsee),
+      "Both Sponsor and Sponsee cannot be specified at the same time.");
+  }
+
+  /**
+   * Validates that when tfDeleteObject is set, no other fields or flags can be specified.
+   */
+  @Value.Check
+  default void validateDeleteObjectConstraints() {
+    if (flags().tfDeleteObject()) {
+      Preconditions.checkState(!feeAmount().isPresent(),
+        "FeeAmount cannot be specified when tfDeleteObject is enabled.");
+
+      Preconditions.checkState(!maxFee().isPresent(),
+        "MaxFee cannot be specified when tfDeleteObject is enabled.");
+
+      Preconditions.checkState(!reserveCount().isPresent(),
+        "ReserveCount cannot be specified when tfDeleteObject is enabled.");
+
+      Preconditions.checkState(!flags().tfSponsorshipSetRequireSignForFee(),
+        "tfSponsorshipSetRequireSignForFee cannot be set when tfDeleteObject is enabled.");
+
+      Preconditions.checkState(!flags().tfSponsorshipClearRequireSignForFee(),
+        "tfSponsorshipClearRequireSignForFee cannot be set when tfDeleteObject is enabled.");
+
+      Preconditions.checkState(!flags().tfSponsorshipSetRequireSignForReserve(),
+        "tfSponsorshipSetRequireSignForReserve cannot be set when tfDeleteObject is enabled.");
+
+      Preconditions.checkState(!flags().tfSponsorshipClearRequireSignForReserve(),
+        "tfSponsorshipClearRequireSignForReserve cannot be set when tfDeleteObject is enabled.");
+    }
+  }
+
+  /**
+   * Validates that mutually exclusive flags are not set together.
+   */
+  @Value.Check
+  default void validateMutuallyExclusiveFlags() {
+    Preconditions.checkState(
+      !(flags().tfSponsorshipSetRequireSignForFee() && flags().tfSponsorshipClearRequireSignForFee()),
+      "tfSponsorshipSetRequireSignForFee and tfSponsorshipClearRequireSignForFee cannot both be set."
+    );
+
+    Preconditions.checkState(
+      !(flags().tfSponsorshipSetRequireSignForReserve() && flags().tfSponsorshipClearRequireSignForReserve()),
+      "tfSponsorshipSetRequireSignForReserve and tfSponsorshipClearRequireSignForReserve cannot both be set."
+    );
+  }
+
+  /**
+   * Validates that only the sponsor can create/update the Sponsorship object.
+   * If Sponsor is specified (meaning Account is the Sponsee), only tfDeleteObject is allowed.
+   */
+  @Value.Check
+  default void validateSponsorCannotCreateOrUpdate() {
+    if (sponsor().isPresent()) {
+      // When Sponsor is specified, Account is the Sponsee, and only deletion is allowed
+      Preconditions.checkState(flags().tfDeleteObject(),
+        "When Sponsor is specified (Account is Sponsee), only tfDeleteObject is allowed. " +
+          "Only the sponsor can create or update the Sponsorship object.");
+    }
+  }
 }
 

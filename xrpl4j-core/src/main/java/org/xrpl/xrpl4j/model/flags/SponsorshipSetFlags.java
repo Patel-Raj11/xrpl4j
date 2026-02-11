@@ -21,6 +21,7 @@ package org.xrpl.xrpl4j.model.flags;
  */
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import org.xrpl.xrpl4j.model.transactions.SponsorshipSet;
 
 /**
@@ -91,7 +92,19 @@ public class SponsorshipSetFlags extends TransactionFlags {
    * @return New {@link SponsorshipSetFlags}.
    */
   public static SponsorshipSetFlags of(long value) {
-    return new SponsorshipSetFlags(value);
+    SponsorshipSetFlags flags = new SponsorshipSetFlags(value);
+
+    Preconditions.checkArgument(
+      !(flags.tfSponsorshipSetRequireSignForFee() && flags.tfSponsorshipClearRequireSignForFee()),
+      "tfSponsorshipSetRequireSignForFee and tfSponsorshipClearRequireSignForFee cannot both be set."
+    );
+
+    Preconditions.checkArgument(
+      !(flags.tfSponsorshipSetRequireSignForReserve() && flags.tfSponsorshipClearRequireSignForReserve()),
+      "tfSponsorshipSetRequireSignForReserve and tfSponsorshipClearRequireSignForReserve cannot both be set."
+    );
+
+    return flags;
   }
 
   /**
@@ -225,6 +238,16 @@ public class SponsorshipSetFlags extends TransactionFlags {
      * @return A new {@link SponsorshipSetFlags}.
      */
     public SponsorshipSetFlags build() {
+      Preconditions.checkArgument(
+        !(tfSponsorshipSetRequireSignForFee && tfSponsorshipClearRequireSignForFee),
+        "tfSponsorshipSetRequireSignForFee and tfSponsorshipClearRequireSignForFee cannot both be set."
+      );
+
+      Preconditions.checkArgument(
+        !(tfSponsorshipSetRequireSignForReserve && tfSponsorshipClearRequireSignForReserve),
+        "tfSponsorshipSetRequireSignForReserve and tfSponsorshipClearRequireSignForReserve cannot both be set."
+      );
+
       long value = TransactionFlags.FULLY_CANONICAL_SIG.getValue();
       if (tfSponsorshipSetRequireSignForFee) {
         value |= SET_REQUIRE_SIGN_FOR_FEE.getValue();

@@ -22,12 +22,13 @@ package org.xrpl.xrpl4j.model.client.accounts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.annotations.Beta;
 import com.google.common.primitives.UnsignedInteger;
 import org.immutables.value.Value;
 import org.xrpl.xrpl4j.model.client.XrplRequestParams;
+import org.xrpl.xrpl4j.model.client.accounts.AccountObjectsRequestParams.AccountObjectType;
 import org.xrpl.xrpl4j.model.client.common.LedgerSpecifier;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.Marker;
@@ -35,30 +36,36 @@ import org.xrpl.xrpl4j.model.transactions.Marker;
 import java.util.Optional;
 
 /**
- * Represents the request parameters for an "account_objects" rippled API call.
+ * Represents the request parameters for an "account_sponsoring" Clio RPC call.
+ *
+ * <p>This API is used to fetch a list of objects that an account is sponsoring; namely, a list of objects
+ * where the Sponsor is the given account.</p>
+ *
+ * <p>This interface is marked as {@link Beta} because the Sponsored Fees feature is not yet enabled on mainnet.</p>
  */
 @Value.Immutable
-@JsonSerialize(as = ImmutableAccountObjectsRequestParams.class)
-@JsonDeserialize(as = ImmutableAccountObjectsRequestParams.class)
-public interface AccountObjectsRequestParams extends XrplRequestParams {
+@JsonSerialize(as = ImmutableAccountSponsoringRequestParams.class)
+@JsonDeserialize(as = ImmutableAccountSponsoringRequestParams.class)
+@Beta
+public interface AccountSponsoringRequestParams extends XrplRequestParams {
 
   /**
    * Construct a builder for this class.
    *
-   * @return An {@link ImmutableAccountObjectsRequestParams.Builder}.
+   * @return An {@link ImmutableAccountSponsoringRequestParams.Builder}.
    */
-  static ImmutableAccountObjectsRequestParams.Builder builder() {
-    return ImmutableAccountObjectsRequestParams.builder();
+  static ImmutableAccountSponsoringRequestParams.Builder builder() {
+    return ImmutableAccountSponsoringRequestParams.builder();
   }
 
   /**
-   * Construct an {@link AccountObjectsRequestParams} for a given account and otherwise default parameters.
+   * Construct an {@link AccountSponsoringRequestParams} for a given account and otherwise default parameters.
    *
-   * @param classicAddress The classic {@link Address} of the account to request objects for.
+   * @param classicAddress The classic {@link Address} of the sponsor account to request sponsored objects for.
    *
-   * @return An {@link AccountObjectsRequestParams} for the given {@link Address}.
+   * @return An {@link AccountSponsoringRequestParams} for the given {@link Address}.
    */
-  static AccountObjectsRequestParams of(Address classicAddress) {
+  static AccountSponsoringRequestParams of(Address classicAddress) {
     return builder()
       .account(classicAddress)
       .ledgerSpecifier(LedgerSpecifier.CURRENT)
@@ -66,9 +73,9 @@ public interface AccountObjectsRequestParams extends XrplRequestParams {
   }
 
   /**
-   * The unique XRPL {@link Address} for the account.
+   * The sponsor account in question.
    *
-   * @return The unique XRPL {@link Address} for the account.
+   * @return The unique XRPL {@link Address} for the sponsor account.
    */
   Address account();
 
@@ -103,8 +110,7 @@ public interface AccountObjectsRequestParams extends XrplRequestParams {
 
   /**
    * The maximum number of {@link org.xrpl.xrpl4j.model.ledger.LedgerObject}s to include in the resulting
-   * {@link AccountObjectsResult#accountObjects()}. Must be within the inclusive range 10 to 400 on non-admin
-   * connections. The default is 200.
+   * {@link AccountSponsoringResult#sponsoredObjects()}.
    *
    * @return An optionally-present {@link UnsignedInteger} denoting the response limit.
    */
@@ -113,89 +119,8 @@ public interface AccountObjectsRequestParams extends XrplRequestParams {
   /**
    * Value from a previous paginated response. Resume retrieving data where that response left off.
    *
-   * @return An optionally-present {@link String} containing the marker.
+   * @return An optionally-present {@link Marker} containing the marker.
    */
   Optional<Marker> marker();
-
-  /**
-   * If {@code true}, only return ledger entries that are sponsored. If {@code false}, only return ledger entries
-   * that are not sponsored. If omitted, return all objects.
-   *
-   * @return An optionally-present {@link Boolean} to filter by sponsored status.
-   */
-  Optional<Boolean> sponsored();
-
-  /**
-   * The enum Account object type.
-   */
-  enum AccountObjectType {
-    /**
-     * Check account object type.
-     */
-    CHECK("check"),
-    /**
-     * Credential account object type.
-     */
-    CREDENTIAL("credential"),
-    /**
-     * Desposit pre auth account object type.
-     */
-    DESPOSIT_PRE_AUTH("deposit_preauth"),
-    /**
-     * Escrow account object type.
-     */
-    ESCROW("escrow"),
-    /**
-     * Offer account object type.
-     */
-    OFFER("offer"),
-    /**
-     * Payment channel account object type.
-     */
-    PAYMENT_CHANNEL("payment_channel"),
-    /**
-     * Permissioned domain account object type.
-     */
-    PERMISSIONED_DOMAIN("permissioned_domain"),
-    /**
-     * Signer list account object type.
-     */
-    SIGNER_LIST("signer_list"),
-    /**
-     * Ticket account object type.
-     */
-    TICKET("ticket"),
-    /**
-     * State account object type.
-     */
-    STATE("state"),
-    /**
-     * MPToken Issuance object type.
-     */
-    MPT_ISSUANCE("mpt_issuance"),
-    /**
-     * MPToken object type.
-     */
-    MP_TOKEN("mptoken"),
-    /**
-     * Sponsorship object type.
-     */
-    SPONSORSHIP("sponsorship");
-
-    private final String value;
-
-    AccountObjectType(String value) {
-      this.value = value;
-    }
-
-    /**
-     * Value string.
-     *
-     * @return the string
-     */
-    @JsonValue
-    public String value() {
-      return value;
-    }
-  }
 }
+
