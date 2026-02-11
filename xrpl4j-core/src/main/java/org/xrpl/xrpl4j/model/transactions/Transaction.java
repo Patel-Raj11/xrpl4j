@@ -104,6 +104,8 @@ public interface Transaction {
       .put(ImmutableMpTokenIssuanceSet.class, TransactionType.MPT_ISSUANCE_SET)
       .put(ImmutableUnknownTransaction.class, TransactionType.UNKNOWN)
       .put(ImmutableAmmClawback.class, TransactionType.AMM_CLAWBACK)
+      .put(ImmutableSponsorshipSet.class, TransactionType.SPONSORSHIP_SET)
+      .put(ImmutableSponsorshipTransfer.class, TransactionType.SPONSORSHIP_TRANSFER)
       .build();
 
   /**

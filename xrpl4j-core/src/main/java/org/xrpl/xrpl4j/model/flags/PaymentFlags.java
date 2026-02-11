@@ -47,6 +47,12 @@ public class PaymentFlags extends TransactionFlags {
    */
   protected static final PaymentFlags LIMIT_QUALITY = new PaymentFlags(0x00040000L);
 
+  /**
+   * Constant {@link PaymentFlags} for the {@code tfSponsorCreatedAccount} flag.
+   * If set, the sponsor pays the reserve for the newly created account.
+   */
+  protected static final PaymentFlags SPONSOR_CREATED_ACCOUNT = new PaymentFlags(0x00080000L);
+
   private PaymentFlags(long value) {
     super(value);
   }
@@ -75,12 +81,13 @@ public class PaymentFlags extends TransactionFlags {
   }
 
   private static PaymentFlags of(boolean tfFullyCanonicalSig, boolean tfNoDirectRipple, boolean tfPartialPayment,
-                                 boolean tfLimitQuality) {
+                                 boolean tfLimitQuality, boolean tfSponsorCreatedAccount) {
     return new PaymentFlags(of(
       tfFullyCanonicalSig ? TransactionFlags.FULLY_CANONICAL_SIG : UNSET,
       tfNoDirectRipple ? NO_DIRECT_RIPPLE : UNSET,
       tfPartialPayment ? PARTIAL_PAYMENT : UNSET,
-      tfLimitQuality ? LIMIT_QUALITY : UNSET
+      tfLimitQuality ? LIMIT_QUALITY : UNSET,
+      tfSponsorCreatedAccount ? SPONSOR_CREATED_ACCOUNT : UNSET
     ).getValue());
   }
 
@@ -127,6 +134,15 @@ public class PaymentFlags extends TransactionFlags {
   }
 
   /**
+   * If set, the sponsor pays the reserve for the newly created account.
+   *
+   * @return {@code true} if {@code tfSponsorCreatedAccount} is set, otherwise {@code false}.
+   */
+  public boolean tfSponsorCreatedAccount() {
+    return this.isSet(PaymentFlags.SPONSOR_CREATED_ACCOUNT);
+  }
+
+  /**
    * A builder class for {@link PaymentFlags} flags.
    */
   public static class Builder {
@@ -134,6 +150,7 @@ public class PaymentFlags extends TransactionFlags {
     private boolean tfNoDirectRipple = false;
     private boolean tfPartialPayment = false;
     private boolean tfLimitQuality = false;
+    private boolean tfSponsorCreatedAccount = false;
 
     /**
      * Set {@code tfNoDirectRipple} to the given value.
@@ -172,12 +189,24 @@ public class PaymentFlags extends TransactionFlags {
     }
 
     /**
+     * Set {@code tfSponsorCreatedAccount} to the given value.
+     *
+     * @param tfSponsorCreatedAccount A boolean value.
+     *
+     * @return The same {@link Builder}.
+     */
+    public Builder tfSponsorCreatedAccount(boolean tfSponsorCreatedAccount) {
+      this.tfSponsorCreatedAccount = tfSponsorCreatedAccount;
+      return this;
+    }
+
+    /**
      * Build a new {@link PaymentFlags} from the current boolean values.
      *
      * @return A new {@link PaymentFlags}.
      */
     public PaymentFlags build() {
-      return PaymentFlags.of(true, tfNoDirectRipple, tfPartialPayment, tfLimitQuality);
+      return PaymentFlags.of(true, tfNoDirectRipple, tfPartialPayment, tfLimitQuality, tfSponsorCreatedAccount);
     }
   }
 }

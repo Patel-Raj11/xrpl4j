@@ -248,6 +248,55 @@ public interface AccountRootObject extends LedgerObject {
   Optional<String> walletLocator();
 
   /**
+   * The sponsor that is paying the account reserve for this account.
+   * This field is included if the account was created with a sponsor paying its account reserve.
+   *
+   * <p>This method will be marked {@link Beta} until the SponsoredFees amendment is enabled on mainnet.
+   * Its API is subject to change.</p>
+   *
+   * @return An {@link Optional} {@link Address} of the sponsor.
+   */
+  @Beta
+  @JsonProperty("Sponsor")
+  Optional<Address> sponsor();
+
+  /**
+   * The number of objects the account owns that are being sponsored by a sponsor.
+   *
+   * <p>This method will be marked {@link Beta} until the SponsoredFees amendment is enabled on mainnet.
+   * Its API is subject to change.</p>
+   *
+   * @return An {@link Optional} {@link UnsignedInteger} representing the sponsored owner count.
+   */
+  @Beta
+  @JsonProperty("SponsoredOwnerCount")
+  Optional<UnsignedInteger> sponsoredOwnerCount();
+
+  /**
+   * The number of objects the account is sponsoring the reserve for.
+   *
+   * <p>This method will be marked {@link Beta} until the SponsoredFees amendment is enabled on mainnet.
+   * Its API is subject to change.</p>
+   *
+   * @return An {@link Optional} {@link UnsignedInteger} representing the sponsoring owner count.
+   */
+  @Beta
+  @JsonProperty("SponsoringOwnerCount")
+  Optional<UnsignedInteger> sponsoringOwnerCount();
+
+  /**
+   * The number of accounts that the account is sponsoring the reserve for.
+   *
+   * <p>This method will be marked {@link Beta} until the SponsoredFees amendment is enabled on mainnet.
+   * Its API is subject to change.</p>
+   *
+   * @return An {@link Optional} {@link UnsignedInteger} representing the sponsoring account count.
+   */
+  @Beta
+  @JsonProperty("SponsoringAccountCount")
+  Optional<UnsignedInteger> sponsoringAccountCount();
+
+  /**
    * The unique ID of this {@link AccountRootObject} ledger object.
    *
    * @return A {@link Hash256}.
